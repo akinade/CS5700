@@ -1,0 +1,51 @@
+#!/bin/bash
+HOSTS=(ec2-54-85-32-37.compute-1.amazonaws.com
+ec2-54-193-70-31.us-west-1.compute.amazonaws.com
+ec2-52-38-67-246.us-west-2.compute.amazonaws.com
+ec2-52-51-20-200.eu-west-1.compute.amazonaws.com
+ec2-52-29-65-165.eu-central-1.compute.amazonaws.com
+ec2-52-196-70-227.ap-northeast-1.compute.amazonaws.com
+ec2-54-169-117-213.ap-southeast-1.compute.amazonaws.com
+ec2-52-63-206-143.ap-southeast-2.compute.amazonaws.com
+ec2-54-233-185-94.sa-east-1.compute.amazonaws.com
+)
+
+# parse command line arguments
+while getopts "u:i:p::o::n::" opt; do
+  case $opt in
+  u)
+      username=$OPTARG
+      ;;
+  i)
+      keyfile=$OPTARG
+      ;;
+  p)
+      portnumber=$OPTARG
+      ;;
+  o)
+      origin=$OPTARG
+      ;;
+  n)
+      nameserver=$OPTARG
+      ;;
+  ?)
+      echo "unkown parameter"
+      ;;
+  esac
+done
+
+# Start DNS server
+echo "starting dns..."
+scp -i ${keyfile} dnsserver dnsserver.py testme.txt ${username}@cs5700cdnproject.ccs.neu.edu:~
+#ssh -i ${keyfile} ${username}@${host} "mkdir content"
+
+# Start HTTP replica servers
+for host in "${HOSTS[@]}"
+do
+  echo "starting $host..."
+  ssh -i ${keyfile} ${username}@${host} "rm *.py httpserver < /dev/null > ./logfile 2>&1 &"
+#  ssh -i ${keyfile} ${username}@${host} "ls < /dev/null > ./logfile 2>&1 &"
+  ssh -i ${keyfile} ${username}@${host} "mkdir content < /dev/null > ./logfile 2>&1 &"
+  scp -i ${keyfile} httpserver httpserver.py testme.txt ${username}@${host}:~
+done
+

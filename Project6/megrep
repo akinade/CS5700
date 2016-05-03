@@ -1,0 +1,41 @@
+#!/bin/bash
+./mergelogs
+for filename in *.log #$files
+do
+cat  $filename > httpdata.txt
+echo '-------------------------------------------------'
+echo $filename
+echo "number of unique calls made"
+awk '{print $9;}' $filename > domains.txt
+python extract.py domains.txt
+#grep -i "get" $filename | sort | wc -l|uniq -c
+echo "-Looking for location data: lat (42.34)"
+egrep -i "[^a-zA-Z]?lat([^a-zA-Z]|itude).*[0-9]+(\.?)[0-9]+" httpdata.txt | wc -l
+echo "Zip code leaks:"
+grep -i "02115" httpdata.txt |wc -l
+echo "number of Email leaks:"
+grep -i "trahkrub" httpdata.txt |wc -l
+echo "number of Password leaks:"
+grep -i "projectRecon567" httpdata.txt |wc -l
+echo "First Name:"
+grep -i "Alexander" httpdata.txt |wc -l
+echo "Last Name:"
+grep -i "Burkhart" httpdata.txt |wc -l
+echo "Date of birth:"
+grep -i "01 Jan 1990" httpdata.txt |wc -l
+echo "Gender:"
+grep -i "Male" httpdata.txt |wc -l
+echo "Ad ID:"
+grep -i "fe43601e-8716-4e1c-b130-20c370cff868" httpdata.txt |wc -l
+echo "Phone Personal info:"
+grep -i "dharanish" httpdata.txt |wc -l
+echo "Build number:"
+grep -i "ALE-L23C605B140" httpdata.txt |wc -l
+echo "os version"
+grep -i "5.0.1" httpdata.txt | wc -l
+echo "os Type"
+grep -i "Android" httpdata.txt | wc -l
+echo "Platform"
+grep -i "5.0.1" httpdata.txt | wc -l
+
+done

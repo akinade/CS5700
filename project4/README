@@ -1,0 +1,147 @@
+Project4
+TeamName : anikadharani
+
+
+Members:
+
+	1) Dharanish	Kedarisetti	001667566
+
+	2) Anika	Ramachandran    001630313
+Files:
+
+	1) rawhttpget - ssh script to run the rawhttpget.py
+	2) rawhttpget.py - python v 2.6 file
+
+	3) rawsock.py - python v 2.6 file
+	3) README - .txt
+---
+---------------------------------------------------------------
+
+rawhttpget 
+------
+
+script file calling rawhttpget.py using python compiler.
+passes the commandlines arguments to the rawhttpget.py file
+
+
+---------------------------------------------------------------
+
+rawhttpget.py
+------
+Downloads the associated web page or file, and saves it to the current directory. If the URL ends in a slash ('/') or does not include any path, then use the default filename index.html
+----------------------------------------------------------------
+rawsock.py
+
+---------
+
+Implements all features of IP packets and subset of TCP's functionality. 
+This includes 
+-validating the checksums of incoming packets, 
+-setting the 
+	correct version,
+	header length
+	total length
+	protocol identifier
+	and checksum 
+ in each outgoing packet.
+----------------------------------------------------------------------------
+
+Built Ethernet frames for each packet.
+
+--------------------------------------------------------------------------
+
+
+High-level approach:
+Our goal was to familiarize with the low-level operations of the Internet protocol stack. We rebuild the operating system's TCP/IP stack within the application.
+
+
+The code uses socket,commands, math, time and sys libraries. It 
+
+contains one class:
+	rawsocket: 
+Initializes all variables
+Creates send socket and receive socket
+ARP packets for retreiving gateway address
+Handles 3-way Handshake and Packet Acks
+Performs Checksum validation for incoming and outgoing packets
+Builds and Processes Ethernet TCP and IP headers
+Calculates Sequence  number and Acknowledgement number
+Sets advertised window to 65000
+Implements timeout of 1 minute if expected data is not received
+Implements Buffer update for storing and sorting out-of-order packets
+Discards packets with sequence number less than the expected value (duplicate) 
+Implements Congestion window for sending data
+Implements timeout of 3 minutes if no data is received
+Handles connection teardown
+
+
+	
+It 
+
+contains the following main functions:
+1)__init__(self) : Initializes all variables including frame values for Ethernet, ARP, TCP and IP headers.
+ Creates send socket and receive socket
+2) connect(self, tuple), handshake(self): Performs 3-way handshake
+3)checksum(self, msg): Performs Checksum validation for incoming and outgoing packets
+4)Tcpheader(self, user_data), processTcp(self,Tcpheader,ip_header,datapac), Ipheader(self), processIp(self, ipHeader),Ethheader(self), processEth(self, data) : Builds and Proceess Ethernet TCP and IP headers
+5) recv_flowpac(self, integer): Validate and unpack TCP and IP and check for timeout if no data is received.
+Implements timeout of 3 minutes if no data is not received
+6) update_buffer(self,data), check_buffer(self,data): Implements Buffer update and buffer check for storing and sorting out of order packets providing cumulative Acknowledgment
+7) getmacAddress(self) : Handles ARP request and response
+8) sendEth(self,packet): Used to add the ethernet header to the TCP+IP packet for sending
+
+
+
+
+
+- CWDN is maintained and is used during receiving and sending of packets. On event of sucessfully receiving an ack the cwnd is incremented by 1 and the next packet would be sent depending on the size of the cwnd. On the event of a packet drop or a timeout cwnd is set to 1 
+
+
+
+
+
+How to run the code:
+1.Set a rule in iptables that drops outgoing TCP RST packets, using the following command:
+
+% iptables -A OUTPUT -p tcp --tcp-flags RST RST -j DROP
+
+2. To turn off checksum offloading, please run the following commands at the start. (This has been added in the MakeFile)
+
+sudo ethtool --offload eth0 rx off tx off
+sudo ethtool -K eth0 gso off
+sudo ethtool -K eth0 gro off
+
+3.The program called 'rawhttpget' takes one command line parameter (a URL), downloads the associated web page or file, and saves it to the current directory. The command line syntax for this program is:
+
+./rawhttpget [URL]
+
+
+
+
+Assumptions:
+we have assumed that:
+
+Program will be executed with administrative privileges.
+
+"/sbin/ifconfig" command on the terminal would output the configuration details ifconfig 
+
+
+
+Challenges faced:
+
+1. To receive out-of-order incoming packets and put them back into the correct order before delivering them to the higher-level, HTTP handling code. Code should also identify and discard duplicate packets:
+Functions used :-
+1) update_buffer(self,data) : If an out-of-order packet is received( not a duplicate), then store the packet in the buffer
+2) check_buffer(self,data) : Checks for the expected packet. If the condition is true, checks the buffer value, sorts the buffer and pops out the packets to the upper layer. It then sends a cumulative acknowledgement.
+
+2. To implement a basic congestion window: Code should start with cwnd=1, and increment the cwnd after each succesful ACK, up to a fixed maximum of 1000 . If there is a packet drop or a timeout, reset the cwnd to 1.
+self.cwnd is set to be 1 and incremented each time there is a correct ACK received. When a duplicate ACK (ACK number < expected ACK number) is received, self.tcp_dup is incremented for every duplicate ACK received. If this value crosses 3 i.e. considered as a packet drop or if a timeout occurs, cwnd is reset back to 1.
+
+3. To implement Ethernet header,the MAC address of the gateway is to be retrieved, since this information needs to be included in the Ethernet header.
+ARP packet was used which broadcasted the query and returned back the IP address of the gateway. The ARP packet was tough to handcraft as it was differnt from the TCP/IP packets. "root -n" was used to get the  IP address of the gateway.
+
+4. Implementation of the ethernet frame was done at a later stage on top of TCP and IP. This was difficult.
+IP checksum validation was not performed at first which was included at this stage. But the checksums were still not being validated properly. Random checksums were not validated whereas some were getting validated. This was resolved by changing the IP header length to TCP header length + data 
+
+
+

@@ -1,0 +1,103 @@
+Project5 
+Roll your own CDN
+
+TeamName: anikadharani
+**************************************************************************************************************************************************
+Members:
+	1) Dharanish Kedarisetti	001667566
+
+	2) Anika Ramachandran    	001630313
+***************************************************************************************************************************************************
+Files:
+	1) deployCDN
+	2) runCDN
+	3) stopCDN
+	4) httpserver
+	5) dnsserver
+	6) httpserver.py- python v 2.6 file
+	7) dnsserver.py- python v 2.6 file
+	8) README 
+	9) host - .txt
+	10) testme -.txt
+****************************************************************************************************************************************************
+Makefile
+
+Run 'make' at the start for the following executables:
+dnsserver 
+httpserver
+deployCDN 
+runCDN
+stopCDN
+
+****************************************************************************************************************************************************
+High Level Approach:
+1) dnsserver.py
+Use,
+               ./dnsserver -p <port> -n <name>
+
+to run the DNS server.
+
+##########################################################################################################################################################
+ASSUMPTION:
+WE ARE USING OUT OF BAND QUERY FOR ACTIVE MEASUREMENTS BETWEEN THE SND SERVER AND THE REPLICA SERVER ON THE GIVEN PORTNUMVER +1 ( PORTNUMBER -1 IN CASE OF THE LAST PORT).
+##########################################################################################################################################################
+
+This script defines two classes:
+	* CDN class
+	* DNSQuery class
+The CDN class takes in the replica server addresses and finds the best replica server by active measurements. The RTT is used to help DNS find the best replica server available.
+The DNSQuery class will return a packet which has a 4-byte data containing the IP address 
+
+2) httpserver.py
+Use,
+               ./httpserver -p <port> -o <origin>
+
+to run the CDN HTTP server.
+
+
+When a client sends request to the HTTP server, the following steps are performed by the server:
+1) Check the local cache. If the requested file is available in the local cache, then read the file from the local cache and send it to the client.
+2) If the requested file does not exist in the local cache, forward the request to ORIGIN server and get the response from the ORIGIN server.  
+If the response status is:
+200 OK: Save the file into local cache and send the response to the client
+
+302 (temporary moved): Do not save the file into local cache as it is a temporary redirect and send the response to the client
+
+301 (permanently moved): Save the file into local cache and send the response to the client
+
+Any other status code: File would be retrieved from the origin server and forwarded to the client and not saved into the local cache.
+
+It contains the following classes: 
+	* HTTPHandler class
+	* Server class
+	* RTT Handler
+	* RTT Server
+****************************************************************************************************************************************************
+Active Measurement (RTT):
+DNS will use active measurement. It will calculate the RTT between the CDN replicas to a specific client that request resources from that CDN and respond the client with one having minimum RTT from the client.
+
+ASSUMPTION:
+We are using out of band query for active measurements between the DNS server and the Replica Server on the given portnumber +1 (Portnumber - 1 in the case of last port).
+
+Cache Management:
+The cache limit of httpserver is 10MB. The cache follows Least Recently Used algorithm. It follows these steps:
+
+1. When the client sends a request to the CDN, it will check its local cache to see the availability of the request.
+2. If that resource doesn't exist, it will forward the request to Origin Server. When the origin server responds with status code: 200 and the resource, CDN will store the resource into the local cache. The memory of the cache is kept in check by a simultaneous process. When the cache does not have enough memory then the server will pop the earlier resource to clear up space for the new resource. Cache management is done by keeping a log of the number of times a page is called and popping out the least called resource rather than popping out the end of the queue. This makes sure that the cache always has space available for a new resource to be stored.
+3. If the resource is present, pick the resource from the cache and respond to the client with that resource. Again, add the resource to the start of the cache queue. This makes sure that the least called resource is shifted to the end of the queue as it has not been retrieved in a long time.
+4. If the response, from the origin server to the CDN is not having status code 200 OK or 301(permanently moved) then it does not cache the content.
+
+Multithreading:
+Multithreading helps us run two processes together independently while using common variables. Multithreading has been implemented on the DNS.
+User does a dig process on the DNS. The DNS server needs an independent process where CDN comes into the picture and returns the best RTT. If the multithreading was not performed, consecutive DNS queries could have been missed. 
+
+Also, Http server should be able to serve multiple clients on the same port. This would not have been possible without using multithreading. The process handling RTT query from DNS server is also multithreaded so as to handle multiple queries on the same DNS server
+****************************************************************************************************************************************************
+Challenges Faced:
+1. Extracting the domain name from the DNS query was challenging and time-consuming. Consequently creating a reply packet was equally difficult.
+2. Creating new server handler classes to pass the parameters required by the get method inside the HTTP server was difficult, but gave ideas to use the methods while multithreading.
+3. When faced with the question of using passive v/s active measurement of replica servers performance though the DNS reply was faster for the passive measurement. 
+   We feel we made the right choice in choosing active measurement, since even though servers might reside near the clients, we observed that far away servers performed better ex:    	   client from Boston had a better rtt to server in Sydney
+
+****************************************************************************************************************************************************
+

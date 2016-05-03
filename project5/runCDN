@@ -1,0 +1,52 @@
+#!/bin/bash
+HOSTS=(ec2-54-85-32-37.compute-1.amazonaws.com
+ec2-54-193-70-31.us-west-1.compute.amazonaws.com
+ec2-52-38-67-246.us-west-2.compute.amazonaws.com
+ec2-52-51-20-200.eu-west-1.compute.amazonaws.com
+ec2-52-29-65-165.eu-central-1.compute.amazonaws.com
+ec2-52-196-70-227.ap-northeast-1.compute.amazonaws.com
+ec2-54-169-117-213.ap-southeast-1.compute.amazonaws.com
+ec2-52-63-206-143.ap-southeast-2.compute.amazonaws.com
+ec2-54-233-185-94.sa-east-1.compute.amazonaws.com
+)
+
+# parse command line arguments
+while getopts "u:i:p::o::n::" opt; do
+  case $opt in
+  u)
+      username=$OPTARG
+      ;;
+  i)
+      keyfile=$OPTARG
+      ;;
+  p)
+      portnumber=$OPTARG
+      ;;
+  o)
+      origin=$OPTARG
+      ;;
+  n)
+      nameserver=$OPTARG
+      ;;
+  ?)
+      echo "unkown parameter"
+      ;;
+  esac
+done
+
+# Run the DNS server
+echo "running dns..."
+#ssh -i ${keyfile} ${username}@cs5700cdnproject.ccs.neu.edu "echo './dnsserver -p $portnumber -n $nameserver'"
+#ssh -i ${keyfile} ${username}@cs5700cdnproject.ccs.neu.edu "echo './dnsserver -p $portnumber -n $nameserver'"
+ssh -i ${keyfile} ${username}@cs5700cdnproject.ccs.neu.edu "./dnsserver -p $portnumber -n $nameserver < /dev/null > ./logfile 2>&1 &"
+
+# Deploy HTTP replica servers
+for host in "${HOSTS[@]}"
+do
+  echo "running to $host..."
+  #ssh -i ${keyfile} ${username}@${host} "pwd"
+  #ssh -i ${keyfile} ${username}@${host} "ls"
+  ssh -i ${keyfile} ${username}@${host} "./httpserver -p $portnumber -o $origin < /dev/null > ./logfile 2>&1 &"
+done
+
+

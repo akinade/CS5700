@@ -1,0 +1,17 @@
+#!/bin/bash
+
+for filename in *http.log #$files
+do
+file=$filename
+newfile=${filename/_http.log/.log}
+mv $filename $newfile
+done
+
+for filename in *https.log #$files
+do
+file=$filename
+newfile=${filename/_https.log/.log}
+cat $filename>> $newfile 
+rm $filename
+done
+

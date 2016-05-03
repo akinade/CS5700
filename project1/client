@@ -1,0 +1,2 @@
+chmod 777 client.py
+python client.py $1 $2 $3 $4 $5

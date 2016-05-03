@@ -1,0 +1,56 @@
+Project6
+TeamName : Dharanish
+Members:
+	1) Dharanish 001667566
+Files Contents:
+	1) megrep
+	2) README - .txt ---
+	3) Makefile
+	4) Extract.py
+	5) mergelogs
+---------------------------------------------------------------
+
+
+How to run the code:
+1. First create the bro log file by using 
+/cs5700/dump2bro [.dump filename]
+2. copy the files Makefile megrep and ectract.py to the bro-log folderMakefile
+3. run Makefile
+3. run ./megrep
+
+
+Results:
+Android app and Chrome dumps of the following applications were captured:
+	- Mc Donalds
+	- Fandango
+	- Cnn
+	- Espn
+All of these applications, contacted multiple domains which can me divided into 3 types 
+	1. Home domain of the app
+	2. Advertiser
+	3. domain providing analytics
+	4. content delivery domains
+
+	As a general trend, most of these applications contacted more number of domains while accessed via chrome browser than the andriod application,
+	This is mostly because of many easily avaliable tracing and advertising services available for the chrome browsers 
+	
+	CNN was the only application whose app connected to more number of unique domains than that of its chrome browser, and it is observed that
+	most of these domains were to advertising companies focussed towards mobile advertising
+	most of the domains contacted by ESPN were to analytics companies, which can be understood as player statistics were checked during the usage of the application
+	
+	A few of the applications used personal phone information (phone name: Dharanish), which was not given to the application.
+	CNN which does not need the info it collected(observed during the PLL) showed the highst PLL leak
+	
+	Each app contacted websites of a different domain. The number of unique sites visited are printed out by the code
+	Testing on andriod has personal phone information such as my email id(dharanish***@gmail.com) leakage which makes the apps insrecure 
+	Mc donalds and Fandango apps has emailID( Username for the app) and Password leakages, making thier usage pointless.
+	Almost all the app's collected advert ID which is generally sufficent for cookie management.
+
+1. OS version and Device name in every case. (App and Browser)
+2. Mc donalds app had very few features and also did not have a login, its gps locator was slow and hence shows a minimal pll
+3. The gps location where this test was conducted, was accurate in all the apps which had a location pll leak, to the 3rd decimal!
+4. Espn had the least amount of ppl leak, cosidering the amount of options that were chosen while using the application, I expected a lot of cookies, but its PLL was minimum
+5. Advertiser ID of the Phone is leaked by the App and not by the browser in every case.
+6. CNN App had the largest number of links to external sites and also had the largest number of location Pll leaks, which was unexpected
+
+
