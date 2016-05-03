@@ -1,13 +1,5 @@
 Project2
 
-TeamName : anikadharani
-
-
-Members:
-
-	1) Dharanish	Kedarisetti	001667566
-
-	2) Anika	Ramachandran    001630313
 Files:
 
 	1) webcrawler-	ssh script to run the topview.py

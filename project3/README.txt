@@ -1,12 +1,4 @@
 Project3
-TeamName : anikadharani
-
-
-Members:
-
-	1) Dharanish	Kedarisetti	001667566
-
-	2) Anika	Ramachandran    001630313
 
 The benchmarks for deciding the “best” TCP variant would be the following:
 1)	Throughput: Ratio of total data transferred to the time taken to transfer.
